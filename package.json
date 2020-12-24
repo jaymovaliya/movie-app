@@ -13,8 +13,11 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
     "start": "cd server && npm install && node index.js",
-    "heroku-postbuild": "npm install && npm run build && cd server && npm install && node index.js"
+    "heroku-postbuild": "npm install && npm run build"
   },
   "engines": {
     "node": "12.18.4"
