@@ -7,9 +7,9 @@ module.exports = () => {
     // POST /movies/fetch
     router.post('/fetch', async (req, res) => {
         try {
-            const { query = "" } = req.body;
-            const result = await Movie.get(query);
-            res.status(200).json({data: result.docs || []});
+            const { query = "", page = 1} = req.body;
+            const result = await Movie.get(query, page);
+            res.status(200).json({data: result || []});
         } catch (e) {
             console.error(e);  
             res.status(500);

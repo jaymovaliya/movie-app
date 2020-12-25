@@ -2,11 +2,11 @@ const Movies = require("../models/movies");
 const user = require("./user");
 
 module.exports = () => ({
-    get: (query) => {
+    get: (query, page) => {
         const options = {
-            page: 1,
-            limit: 5,
-            sort: { createdAt: -1 },
+            page: page,
+            limit: 10,
+            sort: { name: 1 },
         };
         const filter = {
             $or: [
