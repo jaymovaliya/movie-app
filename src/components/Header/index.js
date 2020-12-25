@@ -1,12 +1,14 @@
-import React, { memo, useCallback, useState } from "react";
+import React, { memo, useCallback, useEffect, useState } from "react";
 import { Icon, Button, Modal } from "../../Core-UI";
 import LogIn from "./LogIn";
 import AddEditMovie from "./AddEditMovie";
+import { useDebounce } from "./Hooks";
 import "./styles.scss";
 
 function Header(props){
-    const { loggedIn, setLoggedIn } = props;
+    const { loggedIn, setLoggedIn, setMovies, refetch } = props;
     const [str, setStr] = useState("");
+    const debounceVal = useDebounce(str, 500);
 
     const [login, setLogin] = useState(false);
     const [isAdd, setIsAdd] = useState(false);
@@ -60,6 +62,7 @@ function Header(props){
                 const data = await res.json();
                 console.log(data);
                 setIsAdd(false)
+                refetch()
             } else {
                 alert("Error")
             }
@@ -67,6 +70,29 @@ function Header(props){
             console.log(e)
         }
     },[])
+
+    useEffect(async()=>{
+        const options = {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: str
+            })
+        } 
+        const res = await fetch(`/movies/fetch`, options);
+        if(res.ok){
+            const data = await res.json();
+            setMovies(data.data)
+        }else{
+            alert("Error");
+        }
+    },[debounceVal])
+
+    const handleSearch = (value) => {
+        setStr(value);
+    }
 
     return(
         <div className="header">
@@ -77,7 +103,7 @@ function Header(props){
                     type="text"
                     placeholder="Search here"
                     value={str}
-                    onChange={(e) => setStr(e.target.value)}
+                    onChange={(e) => handleSearch(e.target.value)}
                 />
                 <Icon icon="ICON_SEARCH" className="movie-action-icon" />
             </div>

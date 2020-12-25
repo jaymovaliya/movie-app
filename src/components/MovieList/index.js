@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from "react";
+import React, { memo, useCallback, useMemo, useState } from "react";
 import MovieChip from "./MovieChip";
 import DeleteCard from "./DeleteCard";
 import AddEditMovie from "../Header/AddEditMovie";
@@ -6,12 +6,14 @@ import { Icon, Modal } from "../../Core-UI";
 import "./styles.scss";
 
 function MovieList(props){
-    const { data } = props;
+    const { data, loggedIn, refetch } = props;
     const [delInd, setDelInd] = useState("");
     const [isDelete, setIsDelete] = useState(false);
 
     const [editInd, setEditInd] = useState("");
     const [isEdit, setIsEdit] = useState(false);
+
+    const [selectedChips, setSelectedChips] = useState([]);
 
     const deleteMovie = (i) => {
         setDelInd(i);
@@ -29,9 +31,10 @@ function MovieList(props){
     },[setDelInd, setIsDelete])
 
     const onCloseEdit = useCallback(()=>{
+        console.log("coming here...")
         setEditInd("");
         setIsEdit(false);
-    },[setEditInd, setIsEdit])
+    },[setEditInd, setIsEdit]);
 
     const onDelete = useCallback(async()=>{
         const token = localStorage.getItem('token');
@@ -49,16 +52,16 @@ function MovieList(props){
             const res = await fetch(`/movies/delete`, options);
             if(res.ok){
                 const data = await res.json();
-                console.log(data);
                 setIsDelete(false);
-                setDelInd("")
+                setDelInd("");
+                refetch();
             } else {
                 alert("Error")
             }
         } catch(e){
             console.log(e)
         }
-    },[data, delInd])
+    },[data, delInd, refetch])
 
     const onEdit = useCallback(async(editData)=>{
         const token = localStorage.getItem('token');
@@ -79,23 +82,42 @@ function MovieList(props){
                 const output = await res.json();
                 console.log(output);
                 setIsEdit(false);
-                setEditInd("")
+                setEditInd("");
+                refetch();
             } else {
                 alert("Error")
             }
         } catch(e){
             console.log(e)
         }
-    },[data, editInd])
+    },[data, editInd, refetch]);
+
+
+    const filteredData = useMemo(()=>{
+        return data.filter(d => {
+            if(selectedChips && selectedChips.length > 0){
+                let shouldInclude = false;
+                for(let chip of selectedChips){
+                    if(d.genre.indexOf(chip) > -1){
+                        shouldInclude = true;
+                        break;
+                    }
+                }
+                return shouldInclude;
+            } else {
+                return true;
+            }
+        })
+    },[selectedChips, data]);
 
     return(
         <div className="movie-list">
             <div className="movie-chips">
-                <MovieChip data={data}/>
+                <MovieChip data={data} selectedChips={selectedChips} setSelectedChips={setSelectedChips}/>
             </div>
             <div className="movie-cards">
             {
-                data.map((d, i) => {
+                filteredData.map((d, i) => {
                     return (
                         <div key={i} className="box">
                         <div className="strip">
@@ -107,15 +129,17 @@ function MovieList(props){
                         </div>
                         <div className="content">
                             <div className="movie-title-wrapper">
-                                <div className="movie-title">{d.name}</div>
-                                <div className="movie-actions">
-                                    <div onClick={() => editMovie(i)}>
-                                        <Icon icon="ICON_EDIT" className="movie-action-icon" />
+                                <div className="movie-title" title={d.name}>{d.name}</div>
+                                {
+                                    loggedIn && <div className="movie-actions">
+                                        <div onClick={() => editMovie(i)}>
+                                            <Icon icon="ICON_EDIT" className="movie-action-icon" />
+                                        </div>
+                                        <div onClick={() => deleteMovie(i)}>
+                                            <Icon icon="ICON_DELETE" className="movie-action-icon" />
+                                        </div>
                                     </div>
-                                    <div onClick={() => deleteMovie(i)}>
-                                        <Icon icon="ICON_DELETE" className="movie-action-icon" />
-                                    </div>
-                                </div>
+                                }
                             </div>
                             <div className="rating-info">
                             <div className="background-bar">
@@ -153,7 +177,7 @@ function MovieList(props){
                 isDelete && <DeleteCard isDelete={isDelete} onClose={onCloseDelete} onDelete={onDelete}/>
             }
             {
-                isEdit && <AddEditMovie isEdit={isEdit} onClick={onCloseEdit} onEdit={onEdit} editData={data[editInd]}/>
+                isEdit && <AddEditMovie isEdit={isEdit} onClose={onCloseEdit} onEdit={onEdit} editData={data[editInd]}/>
             }
         </div>
     )

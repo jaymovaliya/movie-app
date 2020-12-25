@@ -42,7 +42,10 @@
 
 .movie-title {
     padding: 5px 15px;
-    font-size: 30px; 
+    font-size: 30px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .background-bar {
@@ -87,10 +90,14 @@
     border: 1px solid var(--border-color);
     box-sizing: border-box;
     transition: background-color 500ms;
+    cursor: pointer;
     &:hover {
         background-color: var(--primary-text-color);
         color: rgb(42, 59, 70);
-        cursor: pointer;
+    }
+    &.selected {
+        background-color: var(--primary-text-color);
+        color: rgb(42, 59, 70);
     }
 }
 

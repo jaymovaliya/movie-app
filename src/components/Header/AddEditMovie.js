@@ -28,22 +28,30 @@ function AddEditMovie(props){
     }
 
     const addNewMovie = useCallback(()=>{
-        addMovie({
-            name,
-            imdb_score: +imdb,
-            genre: genreList,
-            director,
-            popularity: +popularity
-        })
+        if(name && imdb && genreList.length > 0 && director && popularity){
+            addMovie({
+                name,
+                imdb_score: +imdb,
+                genre: genreList,
+                director,
+                popularity: +popularity
+            })
+        } else {
+            alert("All Fields are required");
+        }
     },[addMovie, name, imdb, genreList, director, popularity])
 
     const editMovie = useCallback(()=>{
-        onEdit({
-            imdb_score: +imdb,
-            genre: genreList,
-            director,
-            popularity: +popularity
-        })
+        if(name && imdb && genreList.length > 0 && director && popularity){
+            onEdit({
+                imdb_score: +imdb,
+                genre: genreList,
+                director,
+                popularity: +popularity
+            })
+        } else {
+            alert("All Fields are required");
+        }
     },[onEdit, name, imdb, genreList, director, popularity])
 
     return (
